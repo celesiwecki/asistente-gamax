@@ -9,6 +9,7 @@ const P: Record<string, React.ReactNode> = {
   mas: <><path d="M12 5v14" /><path d="M5 12h14" /></>,
   subir: <><path d="M12 16V4" /><path d="m7 9 5-5 5 5" /><path d="M4 20h16" /></>,
   persona: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+  canales: <><path d="M9 7V2" /><path d="M15 7V2" /><path d="M6 7h12v4a6 6 0 0 1-12 0V7Z" /><path d="M12 17v5" /></>,
   bot: <><rect x="4" y="8" width="16" height="12" rx="3" /><path d="M12 8V4" /><circle cx="9" cy="14" r="1" /><circle cx="15" cy="14" r="1" /></>,
 };
 

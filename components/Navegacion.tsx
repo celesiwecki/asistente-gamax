@@ -7,6 +7,7 @@ const ITEMS = [
   { href: '/panel', n: 'inicio', t: 'Inicio' },
   { href: '/panel/charlas', n: 'charlas', t: 'Charlas' },
   { href: '/panel/envios', n: 'envios', t: 'Envíos' },
+  { href: '/panel/canales', n: 'canales', t: 'Canales' },
   { href: '/panel/clientes', n: 'clientes', t: 'Clientes' },
   { href: '/panel/conocimiento', n: 'saber', t: 'Lo que sabe' },
   { href: '/panel/simulador', n: 'simulador', t: 'Simulador' },

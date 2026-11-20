@@ -1,6 +1,6 @@
 import type { Mensaje } from '@/lib/conversaciones';
 
-const hora = (s: string) => new Date(s).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+const hora = (s: string) => new Date(s).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
 export function Burbujas({ mensajes }: { mensajes: Pick<Mensaje, 'id' | 'de' | 'texto' | 'media_url' | 'creado'>[] }) {
   if (!mensajes.length) return <div className="sys">Sin mensajes todavía.</div>;

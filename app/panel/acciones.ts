@@ -122,6 +122,10 @@ export async function responderComoEquipo(form: FormData) {
   if (!c) return;
   const r = c.canal === 'whatsapp' ? await enviarTexto(c.telefono, texto) : { ok: true as const, id: '' };
   await guardarMensaje(id, 'equipo', texto);
+  if (c.estado !== 'equipo') {
+    await q(`UPDATE conversaciones SET estado = 'equipo' WHERE id = $1`, [id]);
+    await guardarMensaje(id, 'sistema', 'Una persona del equipo tomó la charla');
+  }
   if (!r.ok) await guardarMensaje(id, 'sistema', `No se pudo enviar por WhatsApp: ${r.error}`);
   revalidatePath('/panel/charlas/' + id);
 }

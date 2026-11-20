@@ -3,8 +3,9 @@ import { q } from '@/lib/db';
 import { COSTO_MARKETING_USD, limiteDiario, type Envio } from '@/lib/envios';
 import { crearEnvio } from '../acciones';
 import { CamposEnvio } from '@/components/CamposEnvio';
+import { Encabezado } from '@/components/Encabezado';
 
-const ESTADOS: Record<string, string> = { borrador: 'Borrador', programado: 'Programado', enviando: 'Enviando', enviado: 'Enviado', cancelado: 'Cancelado' };
+const ESTADOS: Record<string, [string, string]> = { borrador: ['Borrador', ''], programado: ['Programado', 'info'], enviando: ['Enviando', 'obra'], enviado: ['Enviado', 'ok'], cancelado: ['Cancelado', 'alerta'] };
 
 export default async function Envios() {
   const lista = await q<Envio & { total: string; listos: string }>(
@@ -14,31 +15,37 @@ export default async function Envios() {
   );
   return (
     <>
-      <h1>Envíos</h1>
-      <p className="sub">Los mensajes semanales a toda la base. Se mandan solos todos los días a las 10, hasta {limiteDiario()} clientes por día.</p>
-      <div className="card">
-        <h2>Envíos</h2>
+      <Encabezado titulo="Envíos" texto={`Los mensajes semanales a la base de clientes. Salen solos todos los días a las 10, hasta ${limiteDiario()} clientes por día.`}>
+        <a className="btn principal-btn" href="#nuevo">Nuevo envío</a>
+      </Encabezado>
+      <section className="bloque">
         <div className="tabla"><table>
-          <thead><tr><th>Título</th><th>A quién</th><th>Fecha</th><th>Estado</th><th>Enviados</th><th>Costo estimado</th></tr></thead>
+          <thead><tr><th>Envío</th><th>Para quién</th><th>Fecha</th><th>Estado</th><th className="num-col">Enviados</th><th className="num-col">Costo en Meta</th></tr></thead>
           <tbody>
-            {!lista.length && <tr><td colSpan={6} className="hint">Todavía no hay envíos.</td></tr>}
-            {lista.map((e) => (
-              <tr key={e.id}>
-                <td><Link href={`/panel/envios/${e.id}`}>{e.titulo}</Link></td>
-                <td>{e.empresa === 'todas' ? 'Todos' : e.empresa}</td>
-                <td>{e.programado_para ? new Date(e.programado_para).toLocaleDateString('es-AR', { timeZone: 'UTC' }) : '—'}</td>
-                <td><span className={`pill ${e.estado === 'enviado' ? 'ok' : e.estado === 'borrador' ? '' : 'warn'}`}>{ESTADOS[e.estado] || e.estado}</span></td>
-                <td>{e.listos} / {e.total}</td>
-                <td>US${(Number(e.total) * COSTO_MARKETING_USD).toFixed(2)}</td>
-              </tr>
-            ))}
+            {!lista.length && <tr><td colSpan={6}><div className="vacio"><b>Todavía no hay envíos</b>Creá el primero con el formulario de abajo.</div></td></tr>}
+            {lista.map((e) => {
+              const [txt, cls] = ESTADOS[e.estado] || [e.estado, ''];
+              const total = Number(e.total), listos = Number(e.listos);
+              return (
+                <tr key={e.id}>
+                  <td><Link href={`/panel/envios/${e.id}`}>{e.titulo}</Link></td>
+                  <td>{e.empresa === 'todas' ? 'Todos' : e.empresa}</td>
+                  <td>{e.programado_para ? new Date(e.programado_para).toLocaleDateString('es-AR', { timeZone: 'UTC', day: 'numeric', month: 'short' }) : 'Sin fecha'}</td>
+                  <td><span className={`pill ${cls}`}>{txt}</span></td>
+                  <td className="num-col">{total ? `${listos} de ${total}` : '—'}</td>
+                  <td className="num-col">{total ? `US$${(total * COSTO_MARKETING_USD).toFixed(2)}` : '—'}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table></div>
-      </div>
-      <form action={crearEnvio} className="card">
-        <h2>Nuevo envío</h2>
-        <CamposEnvio />
-        <div><button className="btn acc" type="submit">Crear borrador</button></div>
+      </section>
+      <form action={crearEnvio} className="bloque" id="nuevo">
+        <div className="bloque-cab"><h2>Nuevo envío</h2><p className="hint">Se guarda como borrador. Después lo revisás y lo programás.</p></div>
+        <div className="bloque-cuerpo">
+          <CamposEnvio />
+          <div><button className="btn principal-btn" type="submit">Guardar borrador</button></div>
+        </div>
       </form>
     </>
   );

@@ -28,43 +28,54 @@ export function Simulador({ clientes }: { clientes: Cli[] }) {
     try {
       const r = await fetch('/api/simulador', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ telefono: tel, nombre: nuevo ? 'Contacto nuevo' : cli?.nombre, texto: t }) });
       const j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'Error');
+      if (!r.ok) throw new Error(j.error || 'No se pudo enviar el mensaje.');
       setMsgs(j.mensajes);
-    } catch (e: any) { setError(e.message || 'No se pudo enviar'); }
+    } catch (e: any) { setError(e.message || 'No se pudo enviar el mensaje.'); }
     setOcupado(false);
   }
   async function borrar() {
     await fetch('/api/simulador?telefono=' + encodeURIComponent(tel), { method: 'DELETE' });
     setMsgs([]);
   }
+  const nombre = nuevo ? 'Contacto nuevo' : cli?.nombre || 'Cliente';
 
   return (
-    <div className="fila" style={{ alignItems: 'flex-start' }}>
-      <div className="card" style={{ flex: '1 1 380px' }}>
-        <div className="chat" ref={caja} style={{ minHeight: 420 }} aria-live="polite">
-          {!msgs.length && <div className="sys">Escribí como si fueras el cliente.</div>}
-          {msgs.map((m) => m.de === 'sistema'
-            ? <div key={m.id} className="sys">{m.texto}</div>
-            : <div key={m.id} className={`b ${m.de}`}>{m.media_url && <span className="media">[Archivo adjunto]</span>}{m.texto}</div>)}
-          {ocupado && <div className="sys">El asistente está escribiendo…</div>}
+    <div className="columnas">
+      <div className="bandeja con-conv" style={{ gridTemplateColumns: 'minmax(0,1fr)', height: 'calc(100vh - 190px)' }}>
+        <div className="conv">
+          <div className="conv-cab"><div className="txt"><b>{nombre}</b><div className="meta">Así ve la charla el equipo en el panel</div></div><button type="button" className="btn sec chico" onClick={borrar}>Borrar charla</button></div>
+          <div className="chat" ref={caja} aria-live="polite">
+            {!msgs.length && <div className="sys">Escribí como si fueras el cliente.</div>}
+            {msgs.map((m) => m.de === 'sistema'
+              ? <div key={m.id} className="sys">{m.texto}</div>
+              : <div key={m.id} className={`b ${m.de}`}>{m.media_url && <span className="media">Archivo adjunto</span>}{m.texto}</div>)}
+            {ocupado && <div className="sys">El asistente está escribiendo</div>}
+          </div>
+          {error && <div className="aviso alerta" style={{ margin: '0 16px 12px' }}>{error}</div>}
+          <form className="composer" onSubmit={(e) => { e.preventDefault(); enviar(texto); }}>
+            <label style={{ flex: 1 }}><span className="sr">Mensaje del cliente</span><input type="text" value={texto} onChange={(e) => setTexto(e.target.value)} disabled={ocupado} placeholder={`Escribí como ${nombre}`} /></label>
+            <button className="btn principal-btn" type="submit" disabled={ocupado}>Enviar</button>
+          </form>
         </div>
-        {error && <div className="aviso">{error}</div>}
-        <form className="fila" onSubmit={(e) => { e.preventDefault(); enviar(texto); }}>
-          <label>Mensaje del cliente<input type="text" value={texto} onChange={(e) => setTexto(e.target.value)} disabled={ocupado} /></label>
-          <button className="btn acc" type="submit" disabled={ocupado}>Enviar</button>
-        </form>
       </div>
-      <div className="card" style={{ flex: '1 1 300px' }}>
-        <h2>¿Quién escribe?</h2>
-        <label>Cliente
-          <select value={nuevo ? '__nuevo' : tel} onChange={(e) => { if (e.target.value === '__nuevo') { setNuevo(true); setTel('1100000000'); } else { setNuevo(false); setTel(e.target.value); } }}>
-            {clientes.map((c) => <option key={c.telefono} value={c.telefono}>{c.nombre} · {c.empresa}</option>)}
-            <option value="__nuevo">Contacto nuevo (no está en la base)</option>
-          </select>
-        </label>
-        <h2>Mensajes de prueba</h2>
-        <div className="fila">{PRUEBAS.map((p) => <button key={p} type="button" className="btn ghost" style={{ flex: '0 0 auto' }} onClick={() => enviar(p)} disabled={ocupado}>{p}</button>)}</div>
-        <button type="button" className="btn ghost" onClick={borrar}>Borrar esta charla</button>
+      <div>
+        <section className="bloque">
+          <div className="bloque-cab"><h2>Quién escribe</h2></div>
+          <div className="bloque-cuerpo">
+            <label>Cliente
+              <select value={nuevo ? '__nuevo' : tel} onChange={(e) => { if (e.target.value === '__nuevo') { setNuevo(true); setTel('1100000000'); } else { setNuevo(false); setTel(e.target.value); } }}>
+                {clientes.map((c) => <option key={c.telefono} value={c.telefono}>{c.nombre} ({c.empresa})</option>)}
+                <option value="__nuevo">Contacto nuevo (no está en la base)</option>
+              </select>
+            </label>
+          </div>
+        </section>
+        <section className="bloque">
+          <div className="bloque-cab"><h2>Mensajes de prueba</h2></div>
+          <div className="bloque-cuerpo" style={{ gap: 8 }}>
+            {PRUEBAS.map((p) => <button key={p} type="button" className="btn sec" style={{ justifyContent: 'flex-start', whiteSpace: 'normal', textAlign: 'left', padding: '8px 14px' }} onClick={() => enviar(p)} disabled={ocupado}>{p}</button>)}
+          </div>
+        </section>
       </div>
     </div>
   );

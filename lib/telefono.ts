@@ -17,3 +17,13 @@ export function normalizarTelefono(entrada: string): string {
   // número que no parece argentino: se deja como vino
   return (entrada || '').replace(/\D/g, '');
 }
+
+/** Muestra un teléfono guardado (549 + área + número) de forma legible: "+54 9 11 5555-0001". */
+export function mostrarTelefono(t: string): string {
+  const d = (t || '').replace(/\D/g, '');
+  if (!d.startsWith('549') || d.length !== 13) return t;
+  const resto = d.slice(3);
+  const area = resto.startsWith('11') ? 2 : 3; // Buenos Aires: 11; la mayoría del interior: 3 cifras
+  const a = resto.slice(0, area), n = resto.slice(area);
+  return `+54 9 ${a} ${n.slice(0, n.length - 4)}-${n.slice(-4)}`;
+}
